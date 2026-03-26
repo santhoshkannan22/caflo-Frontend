@@ -1053,9 +1053,13 @@ document.addEventListener('DOMContentLoaded', () => {
           indicatorsHtml += `<div class="indicator"><ion-icon name="cafe-outline"></ion-icon> <span>Good Seating</span></div>`;
         }
       }
-
+      const fallbackPhotos = [
+        './assets/cafe_interior_modern_1773749047583.png',
+        './assets/cafe_outdoor_sunny_1773749246963.png',
+        './assets/cafe_minimalist_1773749338088.png',
+        './assets/cafe_cozy_warm_1773749449688.png'
+      ];
       const photoSrc = cafe.photo || (cafe.photos && cafe.photos[0]) || fallbackPhotos[Math.floor(Math.random() * fallbackPhotos.length)];
-
       return `
         <div class="cafe-card card" data-id="${cafe._id || cafe.id}" data-lat="${cafe.location?.latitude}" data-lng="${cafe.location?.longitude}" data-name="${cafe.name}">
           <div class="card-image-wrapper">
