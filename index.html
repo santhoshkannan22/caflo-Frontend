@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
@@ -23,14 +26,29 @@
         </div>
         
         <form id="auth-form" class="auth-form">
+          <div id="auth-register-fields" style="display: none; width: 100%;">
+            <div class="avatar-upload-container">
+              <input type="file" id="auth-avatar-input" accept="image/png, image/jpeg, image/webp" hidden>
+              <div class="avatar-preview-circle" id="auth-avatar-preview">
+                <ion-icon name="camera-outline"></ion-icon>
+              </div>
+              <p class="avatar-hint">Profile Photo (Required)</p>
+            </div>
+            
+            <div class="input-group">
+              <label>Full Name</label>
+              <input type="text" id="auth-name" placeholder="Alex Johnson">
+            </div>
+          </div>
+
           <div class="input-group">
             <label>Email</label>
-            <input type="email" id="auth-email" placeholder="alex@example.com" required>
+            <input type="email" id="auth-email" placeholder="alex@example.com">
           </div>
           
           <div class="input-group">
             <label>Password</label>
-            <input type="password" id="auth-password" placeholder="••••••••" required>
+            <input type="password" id="auth-password" placeholder="••••••••">
           </div>
           
           <button type="submit" class="btn-primary" id="auth-submit-btn">Sign In</button>
@@ -47,7 +65,7 @@
       <div class="home-header">
         <div class="header-top">
           <div>
-            <p class="greeting">Good morning, Alex</p>
+            <p class="greeting">Good morning 👋</p>
             <h1>Find your workspace</h1>
           </div>
           <div class="avatar"></div>
@@ -67,9 +85,8 @@
       <div class="feed-section">
         <h2>Nearby Workplaces</h2>
         
-        <div id="cafes-container">
+        <div id="nearby-cafes-container">
           <!-- Dynamic cafe cards will be injected here -->
-          <p style="text-align:center; color: var(--text-light); padding: 40px;">Finding workspaces near you...</p>
         </div>
 
         <div style="height: 40px;"></div>
@@ -78,9 +95,7 @@
 
     <!-- Screen 2: Map View Screen -->
     <main id="screen-map" class="screen">
-      <div class="map-bg">
-        <img src="./assets/map_background_clean_1773800013323.png" alt="Map">
-      </div>
+      <div id="interactive-map" class="map-bg"></div>
       
       <!-- Top Bar Map -->
       <div class="map-top-bar glass">
@@ -90,35 +105,14 @@
         </div>
       </div>
 
-      <!-- Map Pins -->
-      <div class="map-pin active" style="top: 40%; left: 30%;">
-        <div class="pin-score">9.2</div>
-      </div>
-      <div class="map-pin" style="top: 60%; left: 65%;">
-        <div class="pin-score">8.8</div>
-      </div>
-      <div class="map-pin" style="top: 25%; left: 55%;">
-        <div class="pin-score" style="background:var(--accent); color:white;">9.5</div>
-      </div>
+      <!-- Recenter Live Location Button -->
+      <button id="recenter-map-btn" class="glass circle-btn">
+        <ion-icon name="locate"></ion-icon>
+      </button>
 
       <!-- Floating Horizontal Preview -->
-      <div class="map-preview-container no-scrollbar">
-        <div class="map-preview-card card">
-          <img src="./assets/cafe_interior_modern_1773749047583.png" alt="Oak">
-          <div class="preview-info">
-            <h4>The Oak & Fern</h4>
-            <div class="indicator"><ion-icon name="wifi-outline"></ion-icon> <span>120 Mbps</span></div>
-            <p>0.8 mi away</p>
-          </div>
-        </div>
-        <div class="map-preview-card card">
-          <img src="./assets/cafe_minimalist_1773749338088.png" alt="Studio">
-          <div class="preview-info">
-            <h4>Studio Coffee</h4>
-            <div class="indicator"><ion-icon name="wifi-outline"></ion-icon> <span>300 Mbps</span></div>
-            <p>1.5 mi away</p>
-          </div>
-        </div>
+      <div id="single-map-preview" class="map-preview-container single-card-container" style="display: none;">
+        <!-- Injected via app.js -->
       </div>
     </main>
 
@@ -130,7 +124,7 @@
           <button id="back-btn" class="circle-btn glass"><ion-icon name="chevron-back-outline"></ion-icon></button>
           <div class="hero-actions">
             <button class="circle-btn glass"><ion-icon name="share-outline"></ion-icon></button>
-            <button class="circle-btn glass"><ion-icon name="heart-outline"></ion-icon></button>
+            <button class="circle-btn glass" id="detail-save-btn"><ion-icon name="bookmark-outline"></ion-icon></button>
           </div>
         </div>
       </div>
@@ -184,7 +178,7 @@
       </div>
 
       <div class="bottom-action-bar glass">
-        <button class="btn-primary">
+        <button class="btn-primary" id="get-directions-btn">
           <ion-icon name="navigate-circle-outline"></ion-icon>
           Get Directions
         </button>
@@ -199,42 +193,8 @@
       </div>
       
       <div class="feed-section">
-        <!-- Cafe Card 1 (Saved) -->
-        <div class="cafe-card card">
-          <div class="card-image-wrapper">
-            <img src="./assets/cafe_cozy_warm_1773749449688.png" alt="The Bookish Bean">
-            <div class="badge glass score-badge">9.6 Work Score</div>
-            <button class="heart-btn glass active"><ion-icon name="bookmark"></ion-icon></button>
-          </div>
-          <div class="card-content">
-            <div class="card-title-row">
-              <h3>The Bookish Bean</h3>
-              <p class="distance">1.1 mi</p>
-            </div>
-            <div class="indicators">
-              <div class="indicator"><ion-icon name="wifi-outline"></ion-icon> <span>250 Mbps</span></div>
-              <div class="indicator"><ion-icon name="volume-mute-outline"></ion-icon> <span>Library Quiet</span></div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Cafe Card 2 (Saved) -->
-        <div class="cafe-card card">
-          <div class="card-image-wrapper">
-            <img src="./assets/cafe_interior_modern_1773749047583.png" alt="Oak & Fern">
-            <div class="badge glass score-badge">9.2 Work Score</div>
-            <button class="heart-btn glass active"><ion-icon name="bookmark"></ion-icon></button>
-          </div>
-          <div class="card-content">
-            <div class="card-title-row">
-              <h3>The Oak & Fern</h3>
-              <p class="distance">0.8 mi</p>
-            </div>
-            <div class="indicators">
-              <div class="indicator"><ion-icon name="wifi-outline"></ion-icon> <span>120 Mbps</span></div>
-              <div class="indicator"><ion-icon name="volume-low-outline"></ion-icon> <span>Quiet</span></div>
-            </div>
-          </div>
+        <div id="saved-cafes-container">
+          <!-- Dynamic saved cafe cards will be injected here -->
         </div>
 
         <!-- Empty State Example (Hidden by default)
@@ -260,21 +220,11 @@
         </div>
         <h2>Alex Johnson</h2>
         <p>alex.j@example.com</p>
+        <p id="profile-saved-count" style="margin-top: 8px; font-weight: 500; font-size: 14px; color: var(--primary);">0 Saved Cafes</p>
       </div>
 
       <div class="profile-content">
         
-        <div class="stats-row">
-          <div class="stat-card card">
-            <h4>12</h4>
-            <p>Saved</p>
-          </div>
-          <div class="stat-card card">
-            <h4>5</h4>
-            <p>Reviews</p>
-          </div>
-        </div>
-
         <div class="profile-section">
           <h3>Preferences</h3>
           <div class="settings-card card">
@@ -348,6 +298,36 @@
         <button class="logout-btn">Log Out</button>
 
         <div style="height: 60px;"></div>
+      </div>
+    </main>
+    <!-- Screen 6: Edit Profile Screen -->
+    <main id="screen-edit-profile" class="screen slide-up no-scrollbar">
+      <div class="hero-top glass-nav" style="padding-top: 24px;">
+        <button id="edit-back-btn" class="circle-btn glass"><ion-icon name="chevron-down-outline"></ion-icon></button>
+        <h2 style="margin: 0; font-size: 18px;">Edit Profile</h2>
+        <div style="width: 44px;"></div>
+      </div>
+      
+      <div class="profile-content" style="padding-top: 20px;">
+        <div class="avatar-upload-container">
+          <input type="file" id="edit-avatar-input" accept="image/png, image/jpeg, image/webp" hidden>
+          <div class="avatar-preview-circle" id="edit-avatar-preview">
+            <ion-icon name="camera-outline"></ion-icon>
+          </div>
+          <p class="avatar-hint">Tap to change photo</p>
+        </div>
+        
+        <div class="auth-form" style="box-shadow: none; padding: 0;">
+          <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="edit-name" placeholder="Alex Johnson">
+          </div>
+          <div class="input-group">
+            <label>Email (Unchangeable)</label>
+            <input type="email" id="edit-email" readonly style="background: #F0EEEB; color: #A09A95; cursor: not-allowed;">
+          </div>
+          <button class="btn-primary" id="save-profile-btn" style="margin-top: 24px;">Save Changes</button>
+        </div>
       </div>
     </main>
 
