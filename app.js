@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- API & Auth Logic ---
-  const API_BASE_URL = 'http://localhost:5000/api';
+  const API_BASE_URL = 'https://caflo-backend.onrender.com/api';
   let authToken = localStorage.getItem('caflo_token');
 
   // Toggle UI between Login and Register
