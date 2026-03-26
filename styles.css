@@ -105,7 +105,7 @@ p { font-size: 14px; color: var(--text-light); line-height: 1.5; }
 
 /* Bottom Navigation */
 .bottom-nav {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
