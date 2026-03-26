@@ -116,9 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = card.getAttribute('data-name');
       const cafeId = card.getAttribute('data-id');
       
-      if (cafeId) {
-        populateCafeDetailScreen(cafeId, name, { lat, lng });
-      } else if (name) {
+      if (!cafeId && name) {
         const titleEl = document.querySelector('.detail-hero + .detail-content h1');
         if (titleEl) titleEl.textContent = name;
       }
@@ -500,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // --- API & Auth Logic ---
-  const API_BASE_URL = 'http://localhost:5001/api';
+  const API_BASE_URL = 'https://caflo-backend.onrender.com/api';
   let authToken = localStorage.getItem('caflo_token');
   let currentUser = JSON.parse(localStorage.getItem('caflo_user') || 'null');
   
