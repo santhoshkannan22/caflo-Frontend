@@ -527,10 +527,8 @@ p { font-size: 14px; color: var(--text-light); line-height: 1.5; }
 .about-section { margin-bottom: 32px; }
 
 .bottom-action-bar {
-  position: fixed;
-  bottom: 0px;
-  left: 0;
   width: 100%;
+  flex-shrink: 0;
   padding: 16px 24px 36px;
   background: var(--white);
   border-top: 1px solid #EAE5E0;
